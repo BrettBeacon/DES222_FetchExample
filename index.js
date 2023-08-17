@@ -2,6 +2,7 @@
 const fetchButton = document.getElementById("fetchButton");
 const urlTextBox = document.getElementById("urlTextBox");
 const dataResultArea = document.getElementById("mainResults");
+const resultsArea = document.getElementById("LocationResults");
 
 // Make a GET api request
 async function getRequest(someURL) {
@@ -26,6 +27,28 @@ async function getRequest(someURL) {
     return objResult;
 }
 
+async function showResults(Latitude, Longitude) {
+
+    resultsArea.innerHTML = "";
+
+    const OpenMeteoURL = `https://api.open-meteo.com/v1/forecast?latitude=${Latitude}&longitude=${Longitude}&current_weather=true`;
+
+    console.log(OpenMeteoURL);
+
+    const openMeteo = await fetch(OpenMeteoURL);
+
+    const theResult = await openMeteo.json();
+
+    let resultObj = (typeof theResult == "object") ? theResult : JSON.parse(theResult);
+
+    let resultStr = JSON.stringify(resultObj, undefined, 2);
+    resultsArea.innerHTML = `<pre><code>${resultStr}</code></pre>`;
+
+    let wc = resultObj['weathercode'];
+    if (wc == 1) {
+        print("Rainy");
+    }
+}
 
 // Make the GET request when the fetch button is clicked
 fetchButton.addEventListener('click', async (event) => {
@@ -42,3 +65,9 @@ urlTextBox.addEventListener('change', async (event) => {
     let data = await getRequest(url);
     // Do something else with 'data' if you want
 });
+
+GetButton.addEventListener('click', async (event) => {
+    navigator.geolocation.getCurrentPosition((position) => {
+        showResults(position.coords.latitude, position.coords.longitude);
+    })
+})
